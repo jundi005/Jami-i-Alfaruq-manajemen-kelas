@@ -1,0 +1,56 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Kelas {
+  id          String   @id @default(cuid())
+  nama        String   @unique
+  tingkat     String   // misal: 1, 2, 3 untuk tingkatan kelas
+  jurusan     String?  // misal: IPA, IPS, Bahasa, dll
+  waliKelas   String?
+  kapasitas   Int      @default(30)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  santri      Santri[]
+}
+
+model Santri {
+  id          String   @id @default(cuid())
+  nis         String   @unique
+  nama        String
+  jenisKelamin String  // Laki-laki, Perempuan
+  tempatLahir String?
+  tanggalLahir DateTime?
+  alamat      String?
+  noTelp      String?
+  namaOrtu    String?
+  kelasId     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  kelas       Kelas    @relation(fields: [kelasId], references: [id])
+  absensi     Absensi[]
+}
+
+model Absensi {
+  id          String   @id @default(cuid())
+  santriId    String
+  tanggal     DateTime
+  status      String   // Hadir, Sakit, Izin, Alpha
+  keterangan  String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  santri      Santri    @relation(fields: [santriId], references: [id])
+  
+  @@unique([santriId, tanggal])
+}
